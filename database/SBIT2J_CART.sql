@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - Tuesday-May-07-2024   
+--  File created - Thursday-May-09-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Table SBIT2J_CART
@@ -11,7 +11,7 @@
 	"CART_PRODNAME" VARCHAR2(50 BYTE), 
 	"CART_PRICE" NUMBER(20,2), 
 	"CART_SIZE" VARCHAR2(20 BYTE), 
-	"CART_QTY" VARCHAR2(100 BYTE), 
+	"CART_QTY" NUMBER(38,0), 
 	"CART_TOTAL" NUMBER(20,2), 
 	"CART_PRODIMAGE" VARCHAR2(100 BYTE), 
 	"STATUS" VARCHAR2(20 BYTE) DEFAULT 1, 
@@ -22,10 +22,7 @@
   TABLESPACE "SYSTEM" ;
 REM INSERTING into SYSTEM.SBIT2J_CART
 SET DEFINE OFF;
-Insert into SYSTEM.SBIT2J_CART (ID,CART_PRODID,CART_PRODNAME,CART_PRICE,CART_SIZE,CART_QTY,CART_TOTAL,CART_PRODIMAGE,STATUS,USERNAME) values ('3','1002','Cream Jacket',599,'Medium','1',599,'WINDB2.png','0','almelon2');
-Insert into SYSTEM.SBIT2J_CART (ID,CART_PRODID,CART_PRODNAME,CART_PRICE,CART_SIZE,CART_QTY,CART_TOTAL,CART_PRODIMAGE,STATUS,USERNAME) values ('4','1002','Cream Jacket',599,'Small','1',599,'WINDB2.png','1','almelon2');
-Insert into SYSTEM.SBIT2J_CART (ID,CART_PRODID,CART_PRODNAME,CART_PRICE,CART_SIZE,CART_QTY,CART_TOTAL,CART_PRODIMAGE,STATUS,USERNAME) values ('1','1001','Product 1 Example',200,'Small','1',200,'TOPS-MENS4.png','0','clarence');
-Insert into SYSTEM.SBIT2J_CART (ID,CART_PRODID,CART_PRODNAME,CART_PRICE,CART_SIZE,CART_QTY,CART_TOTAL,CART_PRODIMAGE,STATUS,USERNAME) values ('2','1002','Product 2 Example',300,'Small','1',300,'TOPS-WOMENS1.png','0','clarence');
+Insert into SYSTEM.SBIT2J_CART (ID,CART_PRODID,CART_PRODNAME,CART_PRICE,CART_SIZE,CART_QTY,CART_TOTAL,CART_PRODIMAGE,STATUS,USERNAME) values ('1','1003','Red Jacket',599,'Small',1,599,'WINDB3.png','0','almelon2');
 --------------------------------------------------------
 --  DDL for Index SBIT2J_CART_PK
 --------------------------------------------------------
