@@ -44,9 +44,119 @@ if (!empty($_GET)) {
             }
         }
 
-        header("Location: account.php");
+        header("Location: success.php");
         exit;
     } catch (Exception $e) {
         echo "Exception: " . $e->getMessage();
     }
 }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/thankyou.css?=<?php echo time(); ?>">
+
+    <title>THANK YOU</title>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .menu__link {
+        width: 100px;
+        height: 30px;
+        cursor: pointer;
+    }
+
+    .menu__link:hover {
+        background-color: black;
+        color: white;
+    }
+
+
+    .formthank {
+        height: 900px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .complete-text {
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+</style>
+
+<body>
+    <form action="" method="POST" class="formthank">
+
+        <h1 class="complete-text">PURCHASED COMPLETE</h1>
+        <input type="submit" name="return" class="menu__link" value="BACK HOME">
+
+        <?php
+        $sql = "SELECT * FROM SBIT2J_CART";
+        $statement = oci_parse($conn, $sql);
+        oci_execute($statement);
+        while ($row = oci_fetch_assoc($statement)) {
+        ?>
+            <input type="hidden" name="username" value="<?php echo $row['USERNAME'] ?>">
+            <input type="hidden" name="size" value="<?php echo $row['CART_SIZE'] ?>">
+            <input type="hidden" name="qty" value="<?php echo $row['CART_QTY'] ?>">
+            <input type="hidden" name="prod_name" value="<?php echo $row['CART_PRODNAME'] ?>">
+            <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID'] ?>">
+
+
+        <?php
+        }
+        ?>
+    </form>
+
+    <?php
+    if (isset($_POST['return'])) {
+
+        $username = $_POST['username'];
+        $size = $_POST['size'];
+        $qty = $_POST['qty'];
+        $prod_id = $_POST['prod_id'];
+
+        $update_sql = "";
+        switch ($size) {
+            case "Small":
+                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET SMALLQTY = SMALLQTY - $qty WHERE P_ID = '$prod_id'";
+                break;
+            case "Medium":
+                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET MEDIUMQTY = MEDIUMQTY - $qty WHERE P_ID = '$prod_id'";
+                break;
+            case "Large":
+                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET LARGEQTY = LARGEQTY - $qty WHERE P_ID = '$prod_id'";
+                break;
+            default:
+                break;
+        }
+
+        $statement = oci_parse($conn, $update_sql);
+        $success = oci_execute($statement);
+        if ($success) {
+            header("location: index.php");
+        } else {
+            echo "Error updating product quantities.";
+        }
+
+
+        oci_close($conn);
+    }
+    ?>
+
+</body>
+
+</html>

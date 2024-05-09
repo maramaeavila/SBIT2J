@@ -106,7 +106,7 @@ session_start();
                             echo '<h4 class="prod-title">' . $row['P_NAME'] . '</h4>';
                             echo '<p class="prod-price">₱ ' . $row['P_PRICE'] . '</p>';
 
-                            if ($row['P_QTY'] == 0) {
+                            if ($row['SMALLQTY'] == 0 || $row['MEDIUMQTY'] == 0 || $row['LARGEQTY'] == 0) {
                                 echo '<p class="sold-out">Sold Out</p>';
                             } else {
                                 echo '<a href="single_product.php?id=' . $row['P_ID'] . '" class="prod-btn">Add To Cart</a>';
@@ -122,18 +122,16 @@ session_start();
                     echo "Error executing query: " . $error['message'];
                 }
                 ?>
+
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination mt-5">
+                        <li class="page-item"><a class="page-link">Previous</a></li>
+                        <li class="page-item"><a class="page-link">1</a></li>
+                        <li class="page-item"><a class="page-link">2</a></li>
+                        <li class="page-item"><a class="page-link">Next</a></li>
+                    </ul>
+                </nav>
             </div>
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination mt-5">
-                    <li class="page-item"><a class="page-link">Previous</a></li>
-                    <li class="page-item"><a class="page-link">1</a></li>
-                    <li class="page-item"><a class="page-link">2</a></li>
-                    <li class="page-item"><a class="page-link">Next</a></li>
-                </ul>
-
-            </nav>
-        </div>
     </section>
 
     <!-- Banner -->

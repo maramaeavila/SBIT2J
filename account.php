@@ -90,7 +90,7 @@ $row = oci_fetch_assoc($stid);
                 <?php
                 include "connection.php";
 
-                $sql = "SELECT C.*, U.USERNAME, P.P_NAME, P.P_PRICE, P.P_SIZE, P.P_IMAGE
+                $sql = "SELECT C.*, U.USERNAME, P.P_NAME, P.P_PRICE, P.SMALLQTY, P.MEDIUMQTY, P.LARGEQTY, P.P_SIZE, P.P_IMAGE
                         FROM SBIT2J_CART C
                         INNER JOIN SBIT2J_USERACCOUNT U ON C.USERNAME = U.USERNAME
                         INNER JOIN SBIT2J_PRODUCTSTBL P ON C.CART_PRODID = P.P_ID
@@ -101,19 +101,34 @@ $row = oci_fetch_assoc($stid);
 
                 while ($row = oci_fetch_assoc($statement)) {
                     echo "<tr>
-                        <td width='10%'>{$row['CART_PRODID']}</td>
-                        <td>{$row['P_NAME']}</td>
-                        <td>{$row['P_PRICE']}</td>
-                        <td>{$row['P_SIZE']}</td>
-                        <td>{$row['CART_QTY']}</td>
-                        <td>{$row['CART_TOTAL']}</td>
-                        <td><img src='./uploads/{$row['P_IMAGE']}' width='100' height='100'></td>
-                    </tr>";
+                            <td width='10%'>{$row['CART_PRODID']}</td>
+                            <td>{$row['P_NAME']}</td>
+                            <td>{$row['P_PRICE']}</td>
+                            <td>{$row['P_SIZE']}</td>
+                            <td>{$row['CART_QTY']}</td>
+                            <td>{$row['CART_TOTAL']}</td>
+                            <td><img src='./uploads/{$row['P_IMAGE']}' width='100' height='100'></td>
+                        </tr>";
 
                     $productId = $row['CART_PRODID'];
                     $cartQuantity = $row['CART_QTY'];
 
-                    $updateSql = "UPDATE SBIT2J_PRODUCTSTBL SET P_QTY = P_QTY - :cartQuantity WHERE P_ID = :productId";
+                    switch ($row['P_SIZE']) {
+                        case 'Small':
+                            $qtyField = 'SMALLQTY';
+                            break;
+                        case 'Medium':
+                            $qtyField = 'MEDIUMQTY';
+                            break;
+                        case 'Large':
+                            $qtyField = 'LARGEQTY';
+                            break;
+                        default:
+                            echo "Invalid product size: {$row['P_SIZE']}";
+                            continue 2;
+                    }
+
+                    $updateSql = "UPDATE SBIT2J_PRODUCTSTBL SET $qtyField = $qtyField - :cartQuantity WHERE P_ID = :productId";
                     $updateStatement = oci_parse($conn, $updateSql);
                     oci_bind_by_name($updateStatement, ':cartQuantity', $cartQuantity);
                     oci_bind_by_name($updateStatement, ':productId', $productId);

@@ -9,7 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $size = isset($_POST['size']) ? $_POST['size'] : "";
     $productprice = isset($_POST['productprice']) ? $_POST['productprice'] : "";
     $productdescription = isset($_POST['productdescription']) ? $_POST['productdescription'] : "";
-    $productqty = isset($_POST['productqty']) ? $_POST['productqty'] : "";
 
     if (isset($_FILES["productimage"]) && $_FILES["productimage"]["error"] == 0) {
         $targetDirectory = "../uploads/";
@@ -67,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $productqty = 0;
 
-    $sql_insert_product = "INSERT INTO SBIT2J_PRODUCTSTBL (P_ID, P_NAME, P_CATGENDER, P_CATEGORY, P_PRICE, P_SIZE, P_IMAGE, P_DESCRIPTION, P_QTY) 
-                           VALUES (:prod_id, :prod_name, :prod_catgender, :prod_category, :prod_price, :prod_size, :prod_image, :prod_description, :prod_qty)";
+    $sql_insert_product = "INSERT INTO SBIT2J_PRODUCTSTBL (P_ID, P_NAME, P_CATGENDER, P_CATEGORY, P_PRICE, P_SIZE, P_IMAGE, P_DESCRIPTION, SMALLQTY, MEDIUMQTY, LARGEQTY) 
+                           VALUES (:prod_id, :prod_name, :prod_catgender, :prod_category, :prod_price, :prod_size, :prod_image, :prod_description, :smallqty, :mediumqty, :largeqty)";
     $stmt_insert_product = oci_parse($conn, $sql_insert_product);
     oci_bind_by_name($stmt_insert_product, ':prod_id', $next_product_id);
     oci_bind_by_name($stmt_insert_product, ':prod_name', $productname);
@@ -78,7 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     oci_bind_by_name($stmt_insert_product, ':prod_size', $size);
     oci_bind_by_name($stmt_insert_product, ':prod_image', $filename);
     oci_bind_by_name($stmt_insert_product, ':prod_description', $productdescription);
-    oci_bind_by_name($stmt_insert_product, ':prod_qty', $productqty); // Bind product quantity as 0
+    oci_bind_by_name($stmt_insert_product, ':smallqty', $productqty);
+    oci_bind_by_name($stmt_insert_product, ':mediumqty', $productqty);
+    oci_bind_by_name($stmt_insert_product, ':largeqty', $productqty);
 
     oci_execute($stmt_insert_product);
 

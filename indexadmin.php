@@ -176,12 +176,13 @@ include "connection.php";
                                 <th>Product Name</th>
                                 <th>Category</th>
                                 <th>Product Category</th>
-                                <th>Size</th>
                                 <th>Price</th>
                                 <th>Image</th>
                                 <th>Description</th>
-                                <th>Quantity</th>
-                                <th>Add Qty</th>
+                                <th>Small Qty</th>
+                                <th>Medium Qty</th>
+                                <th>Large Qty</th>
+
                                 <th></th>
                             </tr>
                         </thead>
@@ -196,12 +197,13 @@ include "connection.php";
                                     <td>{$row['P_NAME']}</td>
                                     <td>{$row['P_CATGENDER']}</td>
                                     <td>{$row['P_CATEGORY']}</td>
-                                    <td>{$row['P_SIZE']}</td>
-                                    <td>{$row['P_PRICE']}</td>
+                                    <td>₱ {$row['P_PRICE']}</td>
                                     <td><img src='./uploads/{$row['P_IMAGE']}' width='100' height='100'></td>
                                     <td>{$row['P_DESCRIPTION']}</td>
-                                    <td>{$row['P_QTY']}</td>
-                                    <td><input type=number style='width:50px' id='add_qty'></td>
+                                    <td>{$row['SMALLQTY']}:  <input type=number style='width:50px' id='add_qty'></td>
+                                    <td>{$row['MEDIUMQTY']}:   <input type=number style='width:50px' id='add_qty'></td>
+                                    <td>{$row['LARGEQTY']}:   <input type=number style='width:50px' id='add_qty'></td>
+
                                     <td><button type='button' class='btn btn-dark' id='addqty'>ADD</button></td>
                                     </tr>";
                             }
