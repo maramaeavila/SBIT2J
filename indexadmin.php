@@ -338,7 +338,6 @@ if (!isset($_GET['error'])){
                                 <th>Order ID</th>
                                 <th>Username</th>
                                 <th>Product Name</th>
-                                <th>Product Price</th>
                                 <th>Total</th>
                                 <th>Status</th>
 
@@ -351,14 +350,39 @@ if (!isset($_GET['error'])){
                                 $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE STATUS = 'Complete'";
                                 $statement = oci_parse($conn, $sql);
                                 oci_execute($statement);
+                                $totalPrice = 0;
                                 while ($row = oci_fetch_assoc($statement)) {
+                                  
+                                    $arrayPrice = explode(',', $row['EACH_P_TOTAL']);
+                                    $subtotal = 0.0;
+                                    foreach ($arrayPrice as $price) {
+                                        $price = trim($price);
+                                        $subtotal += floatval($price);
+                                        $totalPrice += floatval($price); // Accumulate the total price
+                                    }
+                                    $array3 = array();
+
+                                    $prodNames = explode(',', $row['EACH_P_NAME']);
+                                    $prodQuan = explode(',', $row['EACH_P_IQTY']);
+
+                                    if (count($prodNames) == count($prodQuan)) {
+                                        for ($i = 0; $i < count($prodNames); $i++) {
+                                            $array3[] = $prodNames[$i] . "(" . $prodQuan[$i] . ")";
+                                        }
+                                    }
                                 ?>
                                 <tr>
                                     <td><?php echo $row['ORDER_ID'] ?></td>
                                     <td><?php echo $row['USERNAME'] ?></td>
-                                    <td><?php echo $row['EACH_P_NAME'] ?></td>
-                                    <td><?php echo $row['EACH_P_PRICE'] ?></td>
-                                    <td><?php echo $row['EACH_P_TOTAL'] ?></td>
+                                    <td><?php echo implode(", ", $array3); ?></td>
+                                    <td>
+                                        <?php
+                                            foreach ($arrayPrice as $price) {
+                                                echo "₱" . $price . "<br>"; // Display each individual subtotal
+                                            }
+                                        ?>
+                                            <strong>Total: ₱<?php echo number_format($subtotal, 2); ?></strong>
+                                    </td>
                                     <td><?php echo $row['STATUS'] ?></td>
 
                                 </tr>
@@ -368,6 +392,13 @@ if (!isset($_GET['error'])){
                                 ?>
                             </form>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="1"></td>
+                                <td colspan="2" style="text-align: right;"><strong>Total Gross:</strong></td>
+                                <td><strong>₱<?php echo number_format($totalPrice, 2); ?></strong></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </section>
             </div>
