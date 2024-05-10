@@ -1,0 +1,11 @@
+kunware may changes ka sa file na to
+
+makikita mo yung difference before and after
+
+click mo yung + sign sa side ng file
+
+tapos lagay ka commit message sa text field or dun sa check
+
+tapos click mo check
+
+lumabas yun kasi may changes ngayon na hindi pa saved saka hindi kasama sa staged
