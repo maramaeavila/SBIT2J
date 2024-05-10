@@ -1,13 +1,16 @@
 <?php
 $user = "system";
-$pass = "avila";
+$pass = "Kevs#123";
+$port = "1521";
+$service_name = "orcl";
 $host = "localhost";
-$conn = oci_connect($user, $pass, $host);
+$tns = "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={$host})(PORT={$port}))(CONNECT_DATA=(SERVICE_NAME={$service_name})))";
+$conn = oci_connect($user, $pass, $tns);
 
 if (!$conn) {
     $error = oci_error();
     echo "Connection failed: " . $error['message'];
     exit;
 } else {
-    // echo "Connected to Oracle DB!<br>";
+    // "Connected to Oracle DB!<br>";
 }
