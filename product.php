@@ -19,7 +19,18 @@ session_start();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
 
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
     <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .category {
+            color: black;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 20px;
+            margin-left: 5px;
+        }
+    </style>
 
 </head>
 
@@ -28,6 +39,74 @@ session_start();
     <?php
     include "header.php";
     ?>
+
+    <!-- Products -->
+    <section id="products" style="width: 100%;height: 100vh;padding: 5% 0;margin-top:20px">
+        <div>
+            <h2>Our Products</h2>
+            <div class="prod-cat">
+                <nav id="prodcat">
+                    <a href="?category=All" class="category">All</a>
+                    <a href="?category=T-Shirt" class="category">T-Shirt</a>
+                    <a href="?category=Jeans" class="category">Jeans</a>
+                    <a href="?category=Jackets" class="category">Jackets</a>
+                    <a href="?category=Sweatpants" class="category">Sweatpants</a>
+                    <a href="?category=Dress" class="category">Dress</a>
+                    <a href="?category=Undergarments" class="category">Undergarments</a>
+                </nav>
+            </div>
+
+            <hr>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <?php
+                    include "connection.php";
+
+                    $category = isset($_GET['category']) ? $_GET['category'] : 'All';
+
+                    $sql = "SELECT * FROM SBIT2J_PRODUCTSTBL";
+
+                    if ($category !== 'All') {
+                        $sql .= " WHERE P_CATEGORY = '$category'";
+                    }
+
+                    $statement = oci_parse($conn, $sql);
+                    $result = oci_execute($statement);
+
+                    if ($result) {
+                        if (oci_fetch_all($statement, $rows, null, null, OCI_FETCHSTATEMENT_BY_ROW)) {
+                            foreach ($rows as $row) {
+                                echo '<div class="swiper-slide">';
+                                echo '<div class="prod ' . strtolower($row['P_CATGENDER']) . '" style="height:510px;width:380px">';
+                                echo '<img src="./imgs/products/' . $row['P_IMAGE'] . '">';
+
+                                echo '<div class="prod-info">';
+                                echo '<h4>' . $row['P_CATGENDER'] . '</h4>';
+                                echo '<h4>' . $row['P_CATEGORY'] . '</h4>';
+                                echo '<h4 class="prod-title">' . $row['P_NAME'] . '</h4>';
+                                echo '<p class="prod-price">₱ ' . $row['P_PRICE'] . '</p>';
+
+                                if ($row['SMALLQTY'] == 0 || $row['MEDIUMQTY'] == 0 || $row['LARGEQTY'] == 0) {
+                                    echo '<p class="sold-out">Sold Out</p>';
+                                } else {
+                                    echo '<a href="single_product.php?id=' . $row['P_ID'] . '" class="prod-btn">Add To Cart</a>';
+                                }
+
+                                echo '</div></div></div>';
+                            }
+                        } else {
+                            echo "No rows found.";
+                        }
+                    } else {
+                        $error = oci_error($statement);
+                        echo "Error executing query: " . $error['message'];
+                    }
+                    ?>
+
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+    </section>
 
     <!-- Categories -->
     <section id="categories" class="w-100 my-5 py-5">
@@ -62,78 +141,6 @@ session_start();
         </div>
     </section>
 
-    <!-- Products -->
-    <section id="products">
-        <div>
-            <h2>Our Products</h2>
-            <div class="prod-cat">
-                <nav id="prodcat">
-                    <a href="?category=All">All</a>
-                    <a href="?category=T-Shirt">T-Shirt</a>
-                    <a href="?category=Jeans">Jeans</a>
-                    <a href="?category=Jackets">Jackets</a>
-                    <a href="?category=Sweatpants">Sweatpants</a>
-                    <a href="?category=Dress">Dress</a>
-                    <a href="?category=Undergarments">Undergarments</a>
-                </nav>
-            </div>
-
-            <hr>
-            <div class="all-prod" id="prodSlider">
-                <?php
-                include "connection.php";
-
-                $category = isset($_GET['category']) ? $_GET['category'] : 'All';
-
-                $sql = "SELECT * FROM SBIT2J_PRODUCTSTBL";
-
-                if ($category !== 'All') {
-                    $sql .= " WHERE P_CATEGORY = '$category'";
-                }
-
-                $statement = oci_parse($conn, $sql);
-                $result = oci_execute($statement);
-
-                if ($result) {
-                    if (oci_fetch_all($statement, $rows, null, null, OCI_FETCHSTATEMENT_BY_ROW)) {
-                        foreach ($rows as $row) {
-                            echo '<div class="prod ' . strtolower($row['P_CATGENDER']) . '" onclick="window.location.href=\'single_product.php?id=' . $row['P_ID'] . '\';" style="height:510px;width:380px">';
-                            echo '<img src="./imgs/products/' . $row['P_IMAGE'] . '">';
-
-                            echo '<div class="prod-info">';
-                            echo '<h4>' . $row['P_CATGENDER'] . '</h4>';
-                            echo '<h4>' . $row['P_CATEGORY'] . '</h4>';
-                            echo '<h4 class="prod-title">' . $row['P_NAME'] . '</h4>';
-                            echo '<p class="prod-price">₱ ' . $row['P_PRICE'] . '</p>';
-
-                            if ($row['SMALLQTY'] == 0 || $row['MEDIUMQTY'] == 0 || $row['LARGEQTY'] == 0) {
-                                echo '<p class="sold-out">Sold Out</p>';
-                            } else {
-                                echo '<a href="single_product.php?id=' . $row['P_ID'] . '" class="prod-btn">Add To Cart</a>';
-                            }
-
-                            echo '</div></div>';
-                        }
-                    } else {
-                        echo "No rows found.";
-                    }
-                } else {
-                    $error = oci_error($statement);
-                    echo "Error executing query: " . $error['message'];
-                }
-                ?>
-
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination mt-5">
-                        <li class="page-item"><a class="page-link">Previous</a></li>
-                        <li class="page-item"><a class="page-link">1</a></li>
-                        <li class="page-item"><a class="page-link">2</a></li>
-                        <li class="page-item"><a class="page-link">Next</a></li>
-                    </ul>
-                </nav>
-            </div>
-    </section>
-
     <!-- Banner -->
     <section id="banner">
         <div class="container">
@@ -152,6 +159,26 @@ session_start();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 
     <script>
+        var swiper = new Swiper('.swiper-container', {
+            slidesPerView: 'auto',
+            spaceBetween: 5,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            breakpoints: {
+                768: {
+                    slidesPerView: 4,
+                },
+                576: {
+                    slidesPerView: 2,
+                },
+                0: {
+                    slidesPerView: 1,
+                }
+            }
+        });
+
         $('#categories .box-area').slick({
             slidesToShow: 3,
             slidesToScroll: 1,

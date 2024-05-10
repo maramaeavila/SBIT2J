@@ -1,6 +1,6 @@
 <?php
-$user = "maru";
-$pass = "1234";
+$user = "system";
+$pass = "avila";
 $host = "localhost";
 $conn = oci_connect($user, $pass, $host);
 
