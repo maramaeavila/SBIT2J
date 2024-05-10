@@ -1,6 +1,6 @@
 <?php
 require_once 'connection.php';
-
+session_start();
 if (!empty($_GET)) {
 
     $_SESSION['product'] = $_GET['item_name'];
@@ -114,47 +114,138 @@ if (!empty($_GET)) {
             <input type="hidden" name="qty" value="<?php echo $row['CART_QTY'] ?>">
             <input type="hidden" name="prod_name" value="<?php echo $row['CART_PRODNAME'] ?>">
             <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID'] ?>">
+            
+            <input type="hidden" name="prod_id_array[]" value="<?php echo $row['CART_PRODID']   ?>">
+            <input type="hidden" name="prod_name_array[]" value="<?php echo $row['CART_PRODNAME'] ?>">
+            <input type="hidden" name="price_array[]" value="<?php echo $row['CART_PRICE'] ?>">
+            <input type="hidden" name="size_array[]" value="<?php echo $row['CART_SIZE'] ?>">
+            <input type="hidden" name="qty_array[]" value="<?php echo $row['CART_QTY'] ?>">
+            <input type="hidden" name="subtotal_array[]" value="<?php echo $row['CART_TOTAL'] ?>">
+            <input type="hidden" name="img_array[]" value="<?php echo $row['CART_PRODIMAGE'] ?>">
 
 
+
+           <?php 
+           ?>
         <?php
         }
         ?>
     </form>
 
     <?php
-    if (isset($_POST['return'])) {
+        if(isset($_POST['return'])) {
+            if(isset($_SESSION['username'])) {
+                $username = $_SESSION['username'];
+                $orderid = uniqid();
+                $sql = "SELECT * FROM SBIT2J_CART WHERE USERNAME = :username";
+                $statement = oci_parse($conn, $sql);
+                oci_bind_by_name($statement, ":username", $username); 
+            
+                oci_execute($statement);
+            
+                $prod_ids = array();
+                $prod_names = array();
+                $prices = array();
+                $sizes = array();
+                $qtys = array();
+                $totals = array();
+                $images = array();
+            
+                while ($row = oci_fetch_assoc($statement)) {
+                    $prod_ids[] = $row['CART_PRODID'];
+                    $prod_names[] = $row['CART_PRODNAME'];
+                    $prices[] = $row['CART_PRICE'];
+                    $sizes[] = $row['CART_SIZE'];
+                    $qtys[] = $row['CART_QTY'];
+                    $totals[] = $row['CART_TOTAL'];
+                    $images[] = $row['CART_PRODIMAGE'];
+                }
+            
+                $prod_ids_str = implode(",", $prod_ids);
+                $prod_names_str = implode(",", $prod_names);
+                $prices_str = implode(",", $prices);
+                $sizes_str = implode(",", $sizes);
+                $qtys_str = implode(",", $qtys);
+                $totals_str = implode(",", $totals);
+                $images_str = implode(",", $images);
+            
+                $sql_insert = "INSERT INTO SBIT2J_ORDER_BY_USER (ORDER_ID ,USERNAME, EACH_P_ID, EACH_P_NAME, EACH_P_PRICE, EACH_P_SIZE, EACH_P_IQTY, EACH_P_TOTAL, EACH_P_IMG, STATUS) 
+                            VALUES (:orderid, :username, :prod_ids, :prod_names, :prices, :sizes, :qtys, :totals, :images, 'Pending')";
+                $stmt_insert = oci_parse($conn, $sql_insert);
+            
+                oci_bind_by_name($stmt_insert, ":orderid", $orderid);
 
-        $username = $_POST['username'];
-        $size = $_POST['size'];
-        $qty = $_POST['qty'];
-        $prod_id = $_POST['prod_id'];
+                oci_bind_by_name($stmt_insert, ":username", $username);
+                oci_bind_by_name($stmt_insert, ":prod_ids", $prod_ids_str);
+                oci_bind_by_name($stmt_insert, ":prod_names", $prod_names_str);
+                oci_bind_by_name($stmt_insert, ":prices", $prices_str);
+                oci_bind_by_name($stmt_insert, ":sizes", $sizes_str);
+                oci_bind_by_name($stmt_insert, ":qtys", $qtys_str);
+                oci_bind_by_name($stmt_insert, ":totals", $totals_str);
+                oci_bind_by_name($stmt_insert, ":images", $images_str);
+            
+                oci_execute($stmt_insert);
+            
+                echo "Data inserted successfully!";
+            }
+            
+            
+            // udating the quantity from SBIT2J_PRODUCTSTBL
+            foreach ($prod_ids as $index => $prod_id) {
+                $qty = $qtys[$index];
+                $size = $sizes[$index];
+    
+                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL 
+                               SET ";
+    
+                switch ($size) {
+                    case "Small":
+                        $update_sql .= "SMALLQTY = SMALLQTY - :qty ";
+                        break;
+                    case "Medium":
+                        $update_sql .= "MEDIUMQTY = MEDIUMQTY - :qty ";
+                        break;
+                    case "Large":
+                        $update_sql .= "LARGEQTY = LARGEQTY - :qty ";
+                        break;
+                    default:
+                        break;
+                }
+    
+                $update_sql .= "WHERE P_ID = :prod_id";
+    
+                $statement = oci_parse($conn, $update_sql);
+                oci_bind_by_name($statement, ":qty", $qty);
+                oci_bind_by_name($statement, ":prod_id", $prod_id);
+    
+                $success = oci_execute($statement);
+    
+                if (!$success) {
+                    echo "Error updating product quantities.";
+                    oci_close($conn);
+                    exit;
+                }
+            }
+             // Clear cart items for based the usernmae
+            $clear_cart_sql = "DELETE FROM SBIT2J_CART WHERE USERNAME = :username";
+            $clear_cart_statement = oci_parse($conn, $clear_cart_sql);
+            oci_bind_by_name($clear_cart_statement, ":username", $username);
+            $clear_cart_success = oci_execute($clear_cart_statement);
 
-        $update_sql = "";
-        switch ($size) {
-            case "Small":
-                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET SMALLQTY = SMALLQTY - $qty WHERE P_ID = '$prod_id'";
-                break;
-            case "Medium":
-                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET MEDIUMQTY = MEDIUMQTY - $qty WHERE P_ID = '$prod_id'";
-                break;
-            case "Large":
-                $update_sql = "UPDATE SBIT2J_PRODUCTSTBL SET LARGEQTY = LARGEQTY - $qty WHERE P_ID = '$prod_id'";
-                break;
-            default:
-                break;
-        }
+            if (!$clear_cart_success) {
+                echo "Error clearing cart items.";
+                oci_close($conn);
+                exit;
+            }
 
-        $statement = oci_parse($conn, $update_sql);
-        $success = oci_execute($statement);
-        if ($success) {
+
             header("location: index.php");
-        } else {
-            echo "Error updating product quantities.";
+            oci_close($conn);
         }
-
-
-        oci_close($conn);
-    }
+    
+        
+            
+  
     ?>
 
 </body>

@@ -2,6 +2,7 @@
 <html lang="en">
 <?php
 
+
 include "connection.php";
 session_start();
 ?>
@@ -53,10 +54,8 @@ session_start();
             </thead>
             <tbody>
                 <?php
-                $sql = "SELECT C.*, U.USERNAME, C.STATUS
-                FROM SBIT2J_CART C
-                INNER JOIN SBIT2J_USERACCOUNT U ON C.USERNAME = U.USERNAME
-                WHERE C.STATUS = 1";
+                $username = $_SESSION['username'];
+                $sql = "SELECT * FROM SBIT2J_CART WHERE USERNAME = '$username'";
 
                 $statement = oci_parse($conn, $sql);
                 oci_execute($statement);

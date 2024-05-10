@@ -5,6 +5,17 @@
 session_start();
 
 include "connection.php";
+
+if (!isset($_GET['error'])){
+    echo "";
+ }else{
+     if ($_GET['error'] == "successUpdate"){
+         echo "<script> alert('Quantities updated successfully! '); </script>";
+     }elseif($_GET['error'] == "successUpdateStatus"){
+        echo "<script> alert('Success Updating Status successfully! '); </script>";
+    }
+
+ }
 ?>
 
 <head>
@@ -73,6 +84,20 @@ include "connection.php";
                                 <i class="fa-solid fa-users"></i><span class="fs-4 ms-3 d-none d-sm-inline">Customers Info</span>
                             </a>
                         </li>
+
+                        <li class="nav-item py-2 py-sm-0">
+                            <a href="#pending_order" class="nav-link text-white">
+                                </i><span class="fs-4 ms-3 d-none d-sm-inline">Pending Orders</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item py-2 py-sm-0">
+                            <a href="#complete_order" class="nav-link text-white">
+                                </i><span class="fs-4 ms-3 d-none d-sm-inline">Complete Orders</span>
+                            </a>
+                        </li>
+
+
                     </ul>
                 </div>
                 <div class="p-5">
@@ -131,36 +156,36 @@ include "connection.php";
                     <table class="table table-hover table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Product ID</th>
-                                <th>Product Name</th>
-                                <th>Price</th>
-                                <th>Size</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Image</th>
+                                <th>Order ID</th>
                                 <th>Username</th>
+                                <th>Product Name</th>
+                                <th>Product Price</th>
+                                <th>Total</th>
+
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $sql = "SELECT * FROM SBIT2J_CART WHERE STATUS = 0";
+                            <form action="" method="POST">
+                                <?php
+                                $username = $_SESSION['username'];
+                                $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER ";
+                                $statement = oci_parse($conn, $sql);
+                                oci_execute($statement);
+                                while ($row = oci_fetch_assoc($statement)) {
+                                ?>
+                                <tr>
+                                    <td><?php echo $row['ORDER_ID'] ?></td>
+                                    <td><?php echo $row['USERNAME'] ?></td>
+                                    <td><?php echo $row['EACH_P_NAME'] ?></td>
+                                    <td><?php echo $row['EACH_P_PRICE'] ?></td>
+                                    <td><?php echo $row['EACH_P_TOTAL'] ?></td>
 
-                            $statement = oci_parse($conn, $sql);
-                            oci_execute($statement);
+                                </tr>
 
-                            while ($row = oci_fetch_assoc($statement)) {
-                                echo "<tr>
-                                <td>{$row['CART_PRODID']}</td>
-                                <td>{$row['CART_PRODNAME']}</td>
-                                <td>{$row['CART_PRICE']}</td>
-                                <td>{$row['CART_SIZE']}</td>
-                                <td>{$row['CART_QTY']}</td>
-                                <td>{$row['CART_TOTAL']}</td>
-                                <td><img src='./uploads/{$row['CART_PRODIMAGE']}' width='100' height='100'></td>
-                                <td>{$row['USERNAME']}</td>
-                                </tr>";
-                            }
-                            ?>
+                                <?php
+                                } 
+                                ?>
+                            </form>
                         </tbody>
                     </table>
                 </section>
@@ -169,47 +194,50 @@ include "connection.php";
                     <div>
                         <input class="form-control me-2" type="search" id="searchInput" style="width: 20%; margin:5px" placeholder="Search" aria-label="Search">
                     </div>
-                    <table class="table table-hover table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Product ID</th>
-                                <th>Product Name</th>
-                                <th>Category</th>
-                                <th>Product Category</th>
-                                <th>Price</th>
-                                <th>Image</th>
-                                <th>Description</th>
-                                <th>Small Qty</th>
-                                <th>Medium Qty</th>
-                                <th>Large Qty</th>
-
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody">
-                            <?php
-                            $sql = "SELECT * FROM SBIT2J_PRODUCTSTBL";
-                            $statement = oci_parse($conn, $sql);
-                            oci_execute($statement);
-                            while ($row = oci_fetch_assoc($statement)) {
-                                echo "<tr>
-                                    <td width='10%'><a href='#' class='add-product' data-product-id='{$row['P_ID']}' data-bs-toggle='modal' data-bs-target='#addProductModal'>{$row['P_ID']}</a></td>
-                                    <td>{$row['P_NAME']}</td>
-                                    <td>{$row['P_CATGENDER']}</td>
-                                    <td>{$row['P_CATEGORY']}</td>
-                                    <td>₱ {$row['P_PRICE']}</td>
-                                    <td><img src='./uploads/{$row['P_IMAGE']}' width='100' height='100'></td>
-                                    <td>{$row['P_DESCRIPTION']}</td>
-                                    <td>{$row['SMALLQTY']}:  <input type=number style='width:50px' id='add_qty'></td>
-                                    <td>{$row['MEDIUMQTY']}:   <input type=number style='width:50px' id='add_qty'></td>
-                                    <td>{$row['LARGEQTY']}:   <input type=number style='width:50px' id='add_qty'></td>
-
-                                    <td><button type='button' class='btn btn-dark' id='addqty'>ADD</button></td>
-                                    </tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
+                    <form action="update_prod_qty.php" method="POST">
+                        <table class="table table-hover table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Product Category</th>
+                                    <th>Price</th>
+                                    <th>Image</th>
+                                    <th>Description</th>
+                                    <th>Small Qty</th>
+                                    <th>Medium Qty</th>
+                                    <th>Large Qty</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <?php
+                                $sql = "SELECT * FROM SBIT2J_PRODUCTSTBL";
+                                $statement = oci_parse($conn, $sql);
+                                oci_execute($statement);
+                                while ($row = oci_fetch_assoc($statement)) {
+                                ?>
+                                    <tr>
+                                        <td width='10%'><a href='#' class='add-product' data-product-id='<?php echo $row['P_ID'] ?>' data-bs-toggle='modal' data-bs-target='#addProductModal'><?php echo $row['P_ID'] ?></a></td>
+                                        <td><?php echo $row['P_NAME'] ?></td>
+                                        <td><?php echo $row['P_CATGENDER'] ?></td>
+                                        <td><?php echo $row['P_CATEGORY'] ?></td>
+                                        <td>₱ <?php echo $row['P_PRICE'] ?></td>
+                                        <td><img src='./uploads/<?php echo $row['P_IMAGE'] ?>' width='100' height='100'></td>
+                                        <td><?php echo $row['P_DESCRIPTION']?></td>
+                                        <td><?php echo $row['SMALLQTY'] ?>:  <input type="number" min="0" value="0" style="width:50px"name="smallqty[<?php echo $row['P_ID'] ?>]"></td>
+                                        <td><?php echo $row['MEDIUMQTY'] ?> :  <input type="number" min="0" value="0" style="width:50px" name="mediumqty[<?php echo $row['P_ID'] ?>]"></td>
+                                        <td><?php echo $row['LARGEQTY'] ?>:  <input type="number" min="0" value="0" style="width:50px" name="largeqty[<?php echo $row['P_ID'] ?>]"></td>
+                                        <input type="hidden" name="prodID[]" value="<?php echo $row['P_ID'] ?>">
+                                        <td><input type="submit" class="btn btn-dark" name="updateqty" value="ADD"></td>
+                                    </tr>
+                                <?php
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </form>
                 </section>
 
                 <section id="customers">
@@ -252,11 +280,132 @@ include "connection.php";
                         </tbody>
                     </table>
                 </section>
+
+                <section id="pending_order">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Username</th>
+                                <th>Product Name</th>
+                                <th>Product Price</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th></th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form action="update_prod_qty.php" method="POST">
+                                <?php
+                                $username = $_SESSION['username'];
+                                $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE STATUS = 'Pending'";
+                                $statement = oci_parse($conn, $sql);
+                                oci_execute($statement);
+                                while ($row = oci_fetch_assoc($statement)) {
+                                ?>
+                                <tr>
+                                    <td><?php echo $row['ORDER_ID'] ?></td>
+                                    <td><?php echo $row['USERNAME'] ?></td>
+                                    <td><?php echo $row['EACH_P_NAME'] ?></td>
+                                    <td><?php echo $row['EACH_P_PRICE'] ?></td>
+                                    <td><?php echo $row['EACH_P_TOTAL'] ?></td>
+                                    <td>
+                                        <div class="form-group">
+                                                <select name="status" >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Complete">Complete</option>
+                                                </select>
+                                        </div>
+                                    </td>
+                                    <td><input class="order-user-btn" type="submit" value="UpdateStatus" name="Update"></td>
+                                    <input type="hidden" name="orderid" value="<?php echo $row['ORDER_ID']; ?>">
+                                </tr>
+
+                                <?php
+                                } 
+                                ?>
+                            </form>
+                        </tbody>
+                    </table>
+                </section>
+
+
+                <section id="complete_order">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Username</th>
+                                <th>Product Name</th>
+                                <th>Total</th>
+                                <th>Status</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form action="" method="POST">
+                                <?php
+                                $username = $_SESSION['username'];
+                                $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE STATUS = 'Complete'";
+                                $statement = oci_parse($conn, $sql);
+                                oci_execute($statement);
+                                $totalPrice = 0;
+                                while ($row = oci_fetch_assoc($statement)) {
+                                  
+                                    $arrayPrice = explode(',', $row['EACH_P_TOTAL']);
+                                    $subtotal = 0.0;
+                                    foreach ($arrayPrice as $price) {
+                                        $price = trim($price);
+                                        $subtotal += floatval($price);
+                                        $totalPrice += floatval($price); // Accumulate the total price
+                                    }
+                                    $array3 = array();
+
+                                    $prodNames = explode(',', $row['EACH_P_NAME']);
+                                    $prodQuan = explode(',', $row['EACH_P_IQTY']);
+
+                                    if (count($prodNames) == count($prodQuan)) {
+                                        for ($i = 0; $i < count($prodNames); $i++) {
+                                            $array3[] = $prodNames[$i] . "(" . $prodQuan[$i] . ")";
+                                        }
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?php echo $row['ORDER_ID'] ?></td>
+                                    <td><?php echo $row['USERNAME'] ?></td>
+                                    <td><?php echo implode(", ", $array3); ?></td>
+                                    <td>
+                                        <?php
+                                            foreach ($arrayPrice as $price) {
+                                                echo "₱" . $price . "<br>"; // Display each individual subtotal
+                                            }
+                                        ?>
+                                            <strong>Total: ₱<?php echo number_format($subtotal, 2); ?></strong>
+                                    </td>
+                                    <td><?php echo $row['STATUS'] ?></td>
+
+                                </tr>
+
+                                <?php
+                                } 
+                                ?>
+                            </form>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="1"></td>
+                                <td colspan="2" style="text-align: right;"><strong>Total Gross:</strong></td>
+                                <td><strong>₱<?php echo number_format($totalPrice, 2); ?></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </section>
             </div>
         </div>
     </div>
 
-
+  
     <!-- Modal -->
 
 
@@ -471,39 +620,10 @@ include "connection.php";
             });
         });
 
-        $(document).ready(function() {
-            $('#contentArea').on('click', '#addqty', function() {
-                var productId = $(this).closest('tr').find('.add-product').data('product-id');
-                var addQty = $(this).closest('tr').find('#add_qty').val();
+  
 
-                if (!addQty) {
-                    alert('Please enter a quantity to add.');
-                    return;
-                }
 
-                $.ajax({
-                    url: 'update_prod_qty.php',
-                    type: 'POST',
-                    data: {
-                        productId: productId,
-                        productQty: addQty
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            alert(response.message);
-                            location.reload();
-                        } else {
-                            alert('Failed to update product quantity.');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                        alert('Failed to update product quantity. Please try again.');
-                    }
-                });
-            });
-        });
+
 
         $(document).ready(function() {
             $('#searchInput').on('keyup', function() {
