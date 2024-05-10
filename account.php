@@ -77,68 +77,33 @@ $row = oci_fetch_assoc($stid);
         <table class="mt-5 pt-5">
             <thead>
                 <tr>
-                    <th>Product ID</th>
+                   <th>Order ID</th>
+                    <th>Username</th>
                     <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Size</th>
-                    <th>Quantity</th>
+                    <th>Product Price</th>
                     <th>Total</th>
-                    <th>Image</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                include "connection.php";
+                    $username = $_SESSION['username'];
+                    $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE USERNAME = '$username'";
+                    $statement = oci_parse($conn, $sql);
+                    oci_execute($statement);
+                    while ($row = oci_fetch_assoc($statement)) {
+                ?>
+                    <tr>
+                        <td><?php echo $row['ORDER_ID'] ?></td>
+                        <td><?php echo $row['USERNAME'] ?></td>
+                        <td><?php echo $row['EACH_P_NAME'] ?></td>
+                        <td><?php echo $row['EACH_P_PRICE'] ?></td>
+                        <td><?php echo $row['EACH_P_TOTAL'] ?></td>
+                        <td><span ><?php echo $row['STATUS'] ?></span></td>
+                    </tr>
 
-                $sql = "SELECT C.*, U.USERNAME, P.P_NAME, P.P_PRICE, P.SMALLQTY, P.MEDIUMQTY, P.LARGEQTY, P.P_SIZE, P.P_IMAGE
-                        FROM SBIT2J_CART C
-                        INNER JOIN SBIT2J_USERACCOUNT U ON C.USERNAME = U.USERNAME
-                        INNER JOIN SBIT2J_PRODUCTSTBL P ON C.CART_PRODID = P.P_ID
-                        WHERE C.STATUS = 0";
-
-                $statement = oci_parse($conn, $sql);
-                oci_execute($statement);
-
-                while ($row = oci_fetch_assoc($statement)) {
-                    echo "<tr>
-                            <td width='10%'>{$row['CART_PRODID']}</td>
-                            <td>{$row['P_NAME']}</td>
-                            <td>{$row['P_PRICE']}</td>
-                            <td>{$row['P_SIZE']}</td>
-                            <td>{$row['CART_QTY']}</td>
-                            <td>{$row['CART_TOTAL']}</td>
-                            <td><img src='./uploads/{$row['P_IMAGE']}' width='100' height='100'></td>
-                        </tr>";
-
-                    $productId = $row['CART_PRODID'];
-                    $cartQuantity = $row['CART_QTY'];
-
-                    switch ($row['P_SIZE']) {
-                        case 'Small':
-                            $qtyField = 'SMALLQTY';
-                            break;
-                        case 'Medium':
-                            $qtyField = 'MEDIUMQTY';
-                            break;
-                        case 'Large':
-                            $qtyField = 'LARGEQTY';
-                            break;
-                        default:
-                            echo "Invalid product size: {$row['P_SIZE']}";
-                            continue 2;
-                    }
-
-                    $updateSql = "UPDATE SBIT2J_PRODUCTSTBL SET $qtyField = $qtyField - :cartQuantity WHERE P_ID = :productId";
-                    $updateStatement = oci_parse($conn, $updateSql);
-                    oci_bind_by_name($updateStatement, ':cartQuantity', $cartQuantity);
-                    oci_bind_by_name($updateStatement, ':productId', $productId);
-
-                    $updateResult = oci_execute($updateStatement);
-
-                    if (!$updateResult) {
-                        echo "Failed to update product quantity for product ID: {$productId}";
-                    }
-                }
+                <?php
+                    } 
                 ?>
             </tbody>
         </table>
