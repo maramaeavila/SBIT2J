@@ -273,6 +273,30 @@ h6{
     height: 100vh;
     padding: 5% 0;
 }
+.prod-cat nav{
+   width: 900px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 40px;
+}
+.prod-cat nav a{
+    text-decoration: none;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif ;
+
+    
+}
+.prod-cat nav a:hover{
+    text-decoration: underline;
+    
+}
+
+
+
+
+
+
+
 #featured .prod-cat{
     display: flex;
     justify-content: center;
@@ -380,7 +404,7 @@ h6{
 }
 #products{
     width: 100%;
-    height: 120vh !important;
+    height: 90vh !important;
     padding: 5% 0;
 }
 #products .prod-cat{

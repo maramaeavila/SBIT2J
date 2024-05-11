@@ -22,7 +22,7 @@ session_start();
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/style.css?=<?php echo time(); ?>"> 
     <style>
         .category {
             color: black;
@@ -45,7 +45,7 @@ session_start();
         <div>
             <h2>Our Products</h2>
             <div class="prod-cat">
-                <nav id="prodcat">
+                <nav id="prodcat" >
                     <a href="?category=All" class="category">All</a>
                     <a href="?category=T-Shirt" class="category">T-Shirt</a>
                     <a href="?category=Jeans" class="category">Jeans</a>
