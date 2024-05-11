@@ -10,15 +10,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $productprice = isset($_POST['productprice']) ? $_POST['productprice'] : "";
     $productdescription = isset($_POST['productdescription']) ? $_POST['productdescription'] : "";
 
-    if (isset($_FILES["productimage"]) && $_FILES["productimage"]["error"] == 0) {
-        $targetDirectory = "../uploads/";
-        $targetFile = $targetDirectory . basename($_FILES["productimage"]["name"]);
-        $filename = $_FILES["productimage"]["name"];
+    if (isset($_FILES["xproductimage"]) && $_FILES["xproductimage"]["error"] == 0) {
+        $targetDirectory = "../imgs/products";
+        $targetFile = $targetDirectory . basename($_FILES["xproductimage"]["name"]);
+        $filename = $_FILES["xproductimage"]["name"];
         $uploadOk = 1;
         $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-
-        $check = getimagesize($_FILES["productimage"]["tmp_name"]);
+        $check = getimagesize($_FILES["xproductimage"]["tmp_name"]);
         if ($check !== false) {
+            echo "File is an image - " . $check["mime"] . ".";
             $uploadOk = 1;
         } else {
             echo "File is not an image.";
@@ -31,8 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if (
-            $imageFileType != "jpg" && $imageFileType != "png" &&
-            $imageFileType != "jpeg" && $imageFileType != "gif"
+            $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+            && $imageFileType != "gif"
         ) {
             echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
             $uploadOk = 0;
@@ -51,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "No file uploaded.";
     }
 
-    // PRODUCT ID
     $sql_max_product_id = "SELECT MAX(P_ID) AS MAX_ID FROM SBIT2J_PRODUCTSTBL";
     $stmt_max_product_id = oci_parse($conn, $sql_max_product_id);
     oci_execute($stmt_max_product_id);

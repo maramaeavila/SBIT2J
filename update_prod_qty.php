@@ -40,7 +40,6 @@ if (isset($_POST['Update'])){
     $result = oci_execute($stmt);
 
     if($result) {
-       
         header("location: indexadmin.php?error=successUpdateStatus");
     } else {
         echo "<script> alert('Update failed');</script>";

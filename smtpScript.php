@@ -46,7 +46,7 @@ if (isset($_POST["send"])) {
     $adminMail->setFrom($_POST["email"]);
     $adminMail->addAddress('romero.markkevin.malapit5@gmail.com');
     $adminMail->isHTML(false);
-    $adminMail->Subject = 'Customer Contact Us Messages: ' . $_POST["email"];
+    $adminMail->Subject = 'Customer Contact Us Messages';
     $adminMail->Body = $_POST["message"];
 
 

@@ -13,3 +13,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['xproductidx'])) {
     header("refresh:0;url=indexadmin.php");
     exit;
 }
+

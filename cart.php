@@ -97,8 +97,8 @@ session_start();
                     <input type="hidden" name="currency_code" value="PHP">
                     <input type="hidden" name="no_shipping" value="1">
                     <input type="hidden" name="cmd" value="_xclick">
-                    <input type="hidden" name="return" value="http://localhost/SBIT2J/success.php">
-                    <input type="hidden" name="cancel_return" value="http://localhost/SBIT2J/cart.php">
+                    <input type="hidden" name="return" value="http://localhost/ecommerceSBIT2J/success.php">
+                    <input type="hidden" name="cancel_return" value="http://localhost/ecommerceSBIT2J/cart.php">
                     <input type="text" class="form-control" id="checkout-total" name="total" value="" readonly>
                 </div>
                 <div>
