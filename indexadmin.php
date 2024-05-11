@@ -87,13 +87,13 @@ if (!isset($_GET['error'])){
 
                         <li class="nav-item py-2 py-sm-0">
                             <a href="#pending_order" class="nav-link text-white">
-                                </i><span class="fs-4 ms-3 d-none d-sm-inline">Pending Orders</span>
+                            <i class="fa-solid fa-bag-shopping"></i></i><span class="fs-4 ms-3 d-none d-sm-inline">Pending Orders</span>
                             </a>
                         </li>
 
                         <li class="nav-item py-2 py-sm-0">
                             <a href="#complete_order" class="nav-link text-white">
-                                </i><span class="fs-4 ms-3 d-none d-sm-inline">Complete Orders</span>
+                            <i class="fa-solid fa-peso-sign"></i> <span class="fs-4 ms-3 d-none d-sm-inline"></i>Complete Orders</span>
                             </a>
                         </li>
 
