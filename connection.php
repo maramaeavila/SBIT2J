@@ -1,5 +1,5 @@
 <?php
-$user = "maru";
+$user = "system ";
 $pass = "1234";
 $host = "localhost";
 $conn = oci_connect($user, $pass, $host);

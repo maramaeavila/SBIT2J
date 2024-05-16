@@ -172,20 +172,45 @@ if (!isset($_GET['error'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <form action="" method="POST">
+                        <form action="" method="POST">
                                 <?php
                                 $username = $_SESSION['username'];
                                 $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER ";
                                 $statement = oci_parse($conn, $sql);
                                 oci_execute($statement);
+                                $totalPrice = 0;
                                 while ($row = oci_fetch_assoc($statement)) {
+
+                                    $arrayPrice = explode(',', $row['EACH_P_TOTAL']);
+                                    $subtotal = 0.0;
+                                    foreach ($arrayPrice as $price) {
+                                        $price = trim($price);
+                                        $subtotal += floatval($price);
+                                        $totalPrice += floatval($price);
+                                    }
+                                    $array3 = array();
+
+                                    $prodNames = explode(',', $row['EACH_P_NAME']);
+                                    $prodQuan = explode(',', $row['EACH_P_IQTY']);
+
+                                    if (count($prodNames) == count($prodQuan)) {
+                                        for ($i = 0; $i < count($prodNames); $i++) {
+                                            $array3[] = $prodNames[$i] . "(" . $prodQuan[$i] . ")";
+                                        }
+                                    }
                                 ?>
                                     <tr>
                                         <td><?php echo $row['ORDER_ID'] ?></td>
                                         <td><?php echo $row['USERNAME'] ?></td>
-                                        <td><?php echo $row['EACH_P_NAME'] ?></td>
-                                        <td><?php echo $row['EACH_P_PRICE'] ?></td>
-                                        <td><?php echo $row['EACH_P_TOTAL'] ?></td>
+                                        <td><?php echo implode(", ", $array3); ?></td>
+                                        <td>
+                                            <?php
+                                            foreach ($arrayPrice as $price) {
+                                                echo "₱" . $price . "<br>";
+                                            }
+                                            ?>
+                                        </td>
+                                        <td><strong>Total: ₱<?php echo number_format($subtotal, 2); ?></strong></td>
 
                                     </tr>
 
