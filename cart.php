@@ -83,14 +83,16 @@ ob_start();
                                 <input type="number" min="1" name="qty[<?php echo $row['CART_PRODID'] ?>]" value="<?php echo $row['CART_QTY'] ?>">
                                 <input type="submit" name="updateqtyfrmCart" value="Update Qty" class="btn btn-outline-success" style="width: 120px; padding-bottom: 30px;">
 
-                                <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID'] ?>">
                             </td>
                             <td>
 
                                 <strong>₱ <?php echo number_format($subtotal, 2); ?></strong>
                             </td>
                             <td><img src="uploads/<?php echo $row['CART_PRODIMAGE'] ?>" style="width: 100px; height: 100px;"></td>
-                            <td><input type="submit" name="removefromCart" value="Remove" onclick="return confirmRemove('<?php echo $row['CART_PRODID']; ?>')" class="btn btn-outline-danger"  style="width: 120px; padding-bottom: 30px;"> </td>
+                            <td>
+                                <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID']; ?>">
+                                <input type="submit" name="removefromCart" value="Remove" onclick="return confirmRemove('<?php echo $row['CART_PRODID']; ?>')" class="btn btn-outline-danger"  style="width: 120px; padding-bottom: 30px;">
+                            </td>
                             <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID']   ?>">
                         </tr>
 
@@ -105,7 +107,7 @@ ob_start();
                 <input type="hidden" name="totalprice" value="<?php echo $totalPrice ?>">
             </table>
             <input type="hidden" id="confirm_remove_input" name="confirm_remove" value="">
-
+            <input type="hidden" id="remove_prod_id" name="prod_id" value="">
         </form>
 
         <div class="cart-total">
@@ -417,6 +419,8 @@ ob_start();
             var confirmDelete = confirm("Are you sure you want to remove this item from the cart?");
             if (confirmDelete) {
                 document.getElementById('confirm_remove_input').value = 'yes';
+                document.getElementById('remove_prod_id').value = prod_id;
+
                 return true;
             }
             return false;
