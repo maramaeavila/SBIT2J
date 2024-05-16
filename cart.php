@@ -5,6 +5,7 @@
 
 include "connection.php";
 session_start();
+ob_start();
 ?>
 
 <head>
@@ -38,43 +39,74 @@ session_start();
             <hr>
         </div>
 
-        <table class="mt-5 pt-5">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Product ID</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Size</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                    <th>Image</th>
-                    <!-- <th></th> -->
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $username = $_SESSION['username'];
-                $sql = "SELECT * FROM SBIT2J_CART WHERE USERNAME = '$username'";
+        <form action="" method="POST">
+            <table class="mt-5 pt-5">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Size</th>
+                        <th>Qty</th>
+                        <th>Sub Total</th>
+                        <th>Image</th>
+                        <th></th>
 
-                $statement = oci_parse($conn, $sql);
-                oci_execute($statement);
-                while ($row = oci_fetch_assoc($statement)) {
-                    echo "<tr>
-                    <td><input type='checkbox' name='selected_products[]' value='{$row['ID']}'></td>
-                    <td>{$row['CART_PRODID']}</td>
-                    <td>{$row['CART_PRODNAME']}</td>
-                    <td>{$row['CART_PRICE']}</td>
-                    <td>{$row['CART_SIZE']}</td>
-                    <td>{$row['CART_QTY']}</td>
-                    <td>{$row['CART_TOTAL']}</td>
-                    <td><img src='./uploads/{$row['CART_PRODIMAGE']}' width='100' height='100'></td>
-                <!--     <td><button type='button' class='btn btn-dark delete-cart' data-product-id='{$row['ID']}'>DELETE</button></td> -->
-                  </tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+                        <!-- <th></th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $username = $_SESSION['username'];
+                    $sql = "SELECT * FROM SBIT2J_CART WHERE USERNAME = '$username'";
+
+                    $statement = oci_parse($conn, $sql);
+                    oci_execute($statement);
+
+                    $totalPrice = 0;
+                    while ($row = oci_fetch_assoc($statement)) {
+
+                        $arrayPrice = explode(',', $row['CART_PRICE'] * $row['CART_QTY']);
+                        $subtotal = 0.0;
+                        foreach ($arrayPrice as $price) {
+                            $price = trim($price);
+                            $subtotal += floatval($price);
+                            $totalPrice += floatval($price);
+                        }
+                    ?>
+                        <tr>
+                            <td><?php echo $row['CART_PRODID'] ?></td>
+                            <td><?php echo $row['CART_PRODNAME'] ?></td>
+                            <td>₱ <?php echo $row['CART_PRICE'] ?></td>
+                            <td><?php echo $row['CART_SIZE'] ?></td>
+                            <td>
+                                <input type="number" min="1" name="qty[<?php echo $row['CART_PRODID'] ?>]" value="<?php echo $row['CART_QTY'] ?>">
+                                <input type="submit" name="updateqtyfrmCart" value="Update Qty" class="btn btn-outline-success" style="width: 120px; padding-bottom: 30px;">
+
+                                <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID'] ?>">
+                            </td>
+                            <td>
+
+                                <strong>₱ <?php echo number_format($subtotal, 2); ?></strong>
+                            </td>
+                            <td><img src="uploads/<?php echo $row['CART_PRODIMAGE'] ?>" style="width: 100px; height: 100px;"></td>
+                            <td><input type="submit" name="removefromCart" value="Remove" onclick="return confirmRemove('<?php echo $row['CART_PRODID']; ?>')" class="btn btn-outline-danger"  style="width: 120px; padding-bottom: 30px;"> </td>
+                            <input type="hidden" name="prod_id" value="<?php echo $row['CART_PRODID']   ?>">
+                        </tr>
+
+
+
+
+                    <?php
+                    }
+                    ?>
+
+                </tbody>
+                <input type="hidden" name="totalprice" value="<?php echo $totalPrice ?>">
+            </table>
+            <input type="hidden" id="confirm_remove_input" name="confirm_remove" value="">
+
+        </form>
 
         <div class="cart-total">
 
@@ -82,6 +114,51 @@ session_start();
 
     </section>
 
+    
+
+ <!-- update abd remove function -->
+    <?php
+
+    if (isset($_POST['updateqtyfrmCart'])) {
+        foreach ($_POST['qty'] as $prod_id => $qty) {
+            $username = $_SESSION['username'];
+            $prod_id = $prod_id;
+            $qty = $qty;
+
+            $update_sql = "UPDATE SBIT2J_CART SET CART_QTY = :qty WHERE CART_PRODID = :prod_id AND USERNAME = :username";
+            $update_statement = oci_parse($conn, $update_sql);
+            oci_bind_by_name($update_statement, ':qty', $qty);
+            oci_bind_by_name($update_statement, ':prod_id', $prod_id);
+            oci_bind_by_name($update_statement, ':username', $username);
+            oci_execute($update_statement);
+        }
+
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    if (isset($_POST['removefromCart'])) {
+        if (isset($_POST['confirm_remove']) && $_POST['confirm_remove'] === 'yes') {
+            $remove_prod_id = $_POST['prod_id'];
+            $username = $_SESSION['username'];
+    
+            $delete_sql = "DELETE FROM SBIT2J_CART WHERE CART_PRODID = :prod_id AND USERNAME = :username";
+            $delete_statement = oci_parse($conn, $delete_sql);
+            oci_bind_by_name($delete_statement, ':prod_id', $remove_prod_id);
+            oci_bind_by_name($delete_statement, ':username', $username);
+            oci_execute($delete_statement);
+    
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        }
+    }
+    ?>
+
+
+    <!-- check out -->
     <section id="checkout" class="my-5 py-5">
         <div class="container text-center mt-3 pt-3">
             <h2 class="form-weight-bold">Checkout Payment</h2>
@@ -90,7 +167,7 @@ session_start();
         <div class="mx-auto container">
             <form method="post" action="https://www.sandbox.paypal.com/cgi-bin/webscr" class="col-md-4 mb-5 mt-5 payment-form">
                 <div class="form-group checkout-small-element">
-                    <label>Total</label>
+                    <label>Grand Total:</label>
                     <input type="hidden" name="business" value="sb-gju3a29373225@business.example.com">
                     <input type="hidden" name="item_name" id="item_name">
                     <input type="hidden" name="amount" id="amount">
@@ -311,37 +388,39 @@ session_start();
             });
         }
 
+
         $(document).ready(function() {
             updateTotal();
-
-            $('#select-all-btn').click(function() {
-                updateTotal();
-            });
-
-            $('input[name="selected_products[]"]').change(function() {
-                updateTotal();
-            });
 
             function updateTotal() {
                 var total = 0;
                 var selectedProducts = [];
-                $('input[name="selected_products[]"]:checked').each(function() {
-                    var totalText = $(this).closest('tr').find('td:nth-child(7)').text().trim();
-                    var rowTotal = parseFloat(totalText.replace('₱', '').trim());
+                $('input[name="totalprice"]').each(function() {
+                    var totalText = $(this).val().trim();
+                    var rowTotal = parseFloat(totalText);
                     if (!isNaN(rowTotal)) {
                         total += rowTotal;
+                        selectedProducts.push(rowTotal);
                     } else {
                         console.error('Error: Unable to parse total:', totalText);
                     }
-                    selectedProducts.push($(this).val());
                 });
                 $('#checkout-total').val('₱ ' + total);
-                $('#checkout-totalsecond').val(total);
                 $('#amount').val(total);
                 $('#item_name').val(selectedProducts.join(', '));
                 console.log(selectedProducts);
             }
         });
+
+        //confirm delete product 
+        function confirmRemove(prod_id) {
+            var confirmDelete = confirm("Are you sure you want to remove this item from the cart?");
+            if (confirmDelete) {
+                document.getElementById('confirm_remove_input').value = 'yes';
+                return true;
+            }
+            return false;
+        }
     </script>
 </body>
 
