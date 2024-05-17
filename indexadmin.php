@@ -13,6 +13,8 @@ if (!isset($_GET['error'])) {
         echo "<script> alert('Quantities updated successfully! '); </script>";
     } elseif ($_GET['error'] == "successUpdateStatus") {
         echo "<script> alert('Success Updating Status successfully! '); </script>";
+    } elseif ($_GET['error'] == "successAddproduct") {
+        echo "<script> alert('Success Adding products'); </script>";
     }
 }
 ?>
@@ -86,13 +88,13 @@ if (!isset($_GET['error'])) {
 
                         <li class="nav-item py-2 py-sm-0">
                             <a href="#pending_order" class="nav-link text-white">
-                            <i class="fa-solid fa-bag-shopping"></i></i><span class="fs-4 ms-3 d-none d-sm-inline">Pending Orders</span>
+                                <i class="fa-solid fa-bag-shopping"></i></i><span class="fs-4 ms-3 d-none d-sm-inline">Pending Orders</span>
                             </a>
                         </li>
 
                         <li class="nav-item py-2 py-sm-0">
                             <a href="#complete_order" class="nav-link text-white">
-                            <i class="fa-solid fa-peso-sign"></i> <span class="fs-4 ms-3 d-none d-sm-inline"></i>Complete Orders</span>
+                                <i class="fa-solid fa-peso-sign"></i> <span class="fs-4 ms-3 d-none d-sm-inline"></i>Complete Orders</span>
                             </a>
                         </li>
 
@@ -296,27 +298,46 @@ if (!isset($_GET['error'])) {
                                 <th>Username</th>
                                 <th>Product Name</th>
                                 <th>Product Price</th>
-                                <th>Total</th>
                                 <th>Status</th>
                                 <th></th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            <form action="update_prod_qty.php" method="POST">
-                                <?php
-                                $username = $_SESSION['username'];
-                                $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE STATUS = 'Pending'";
-                                $statement = oci_parse($conn, $sql);
-                                oci_execute($statement);
-                                while ($row = oci_fetch_assoc($statement)) {
-                                ?>
-                                    <tr>
+                            <?php
+                            $sql = "SELECT * FROM SBIT2J_ORDER_BY_USER WHERE STATUS = 'Pending'";
+                            $statement = oci_parse($conn, $sql);
+                            oci_execute($statement);
+                            $totalPrice = 0;
+                            while ($row = oci_fetch_assoc($statement)) {
+                                $arrayPrice = explode(',', $row['EACH_P_TOTAL']);
+                                $subtotal = 0.0;
+                                foreach ($arrayPrice as $price) {
+                                    $price = trim($price);
+                                    $subtotal += floatval($price);
+                                    $totalPrice += floatval($price);
+                                }
+                                $array3 = array();
+                                $prodNames = explode(',', $row['EACH_P_NAME']);
+                                $prodQuan = explode(',', $row['EACH_P_IQTY']);
+                                if (count($prodNames) == count($prodQuan)) {
+                                    for ($i = 0; $i < count($prodNames); $i++) {
+                                        $array3[] = $prodNames[$i] . "(" . $prodQuan[$i] . ")";
+                                    }
+                                }
+                            ?>
+                                <tr>
+                                    <form action="update_prod_qty.php" method="POST">
                                         <td><?php echo $row['ORDER_ID'] ?></td>
                                         <td><?php echo $row['USERNAME'] ?></td>
-                                        <td><?php echo $row['EACH_P_NAME'] ?></td>
-                                        <td><?php echo $row['EACH_P_PRICE'] ?></td>
-                                        <td><?php echo $row['EACH_P_TOTAL'] ?></td>
+                                        <td><?php echo implode(", ", $array3); ?></td>
+                                        <td>
+                                            <?php
+                                            foreach ($arrayPrice as $price) {
+                                                echo "₱" . $price . "<br>";
+                                            }
+                                            ?>
+                                            <strong>Total: ₱<?php echo number_format($subtotal, 2); ?></strong>
+                                        </td>
                                         <td>
                                             <div class="form-group">
                                                 <select name="status">
@@ -325,15 +346,23 @@ if (!isset($_GET['error'])) {
                                                 </select>
                                             </div>
                                         </td>
-                                        <td><input class="order-user-btn" type="submit" value="UpdateStatus" name="Update"></td>
-                                        <input type="hidden" name="orderid" value="<?php echo $row['ORDER_ID']; ?>">
-                                    </tr>
-
-                                <?php
-                                }
-                                ?>
-                            </form>
+                                        <td>
+                                            <input type="hidden" name="orderid" value="<?php echo $row['ORDER_ID']; ?>">
+                                            <input class="order-user-btn" type="submit" value="UpdateStatus" name="Update">
+                                        </td>
+                                    </form>
+                                </tr>
+                            <?php
+                            }
+                            ?>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="1"></td>
+                                <td colspan="2" style="text-align: right;"><strong>Pending Total:</strong></td>
+                                <td><strong>₱<?php echo number_format($totalPrice, 2); ?></strong></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </section>
 
@@ -413,8 +442,8 @@ if (!isset($_GET['error'])) {
     </div>
 
 
-    <!-- Modal -->
 
+    <!-- Modal -->
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -462,7 +491,7 @@ if (!isset($_GET['error'])) {
                         </div>
                         <div class="form-group">
                             <label> Price </label>
-                            <input type="text" name="productprice" class="form-control" placeholder="Enter Product Price" required>
+                            <input type="number" name="productprice" class="form-control" placeholder="Enter Product Price" required>
                         </div>
                         <div class="form-group">
                             <label> Description </label>
@@ -470,11 +499,11 @@ if (!isset($_GET['error'])) {
                         </div>
                         <div class="form-group">
                             <label> Image </label>
-                            <input type="file" name="productimage" class="form-control" required>
+                            <input type="file" name="productimage" class="form-control" accept=".jpg, .png, .jpeg" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" name="registerbtn" class="btn btn-dark">Save</button>
+                        <button type="submit" name="addProduct" class="btn btn-dark">Save</button>
                     </div>
                 </form>
             </div>

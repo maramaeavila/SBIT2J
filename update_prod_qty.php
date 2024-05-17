@@ -1,9 +1,9 @@
 <?php
 include "connection.php";
 
-if(isset($_POST['updateqty'])) {
-    foreach($_POST['prodID'] as $prodID) {
-        if(isset($_POST['smallqty'][$prodID]) && isset($_POST['mediumqty'][$prodID]) && isset($_POST['largeqty'][$prodID])) {
+if (isset($_POST['updateqty'])) {
+    foreach ($_POST['prodID'] as $prodID) {
+        if (isset($_POST['smallqty'][$prodID]) && isset($_POST['mediumqty'][$prodID]) && isset($_POST['largeqty'][$prodID])) {
             $smallQtyToAdd = $_POST['smallqty'][$prodID];
             $mediumQtyToAdd = $_POST['mediumqty'][$prodID];
             $largeQtyToAdd = $_POST['largeqty'][$prodID];
@@ -14,20 +14,16 @@ if(isset($_POST['updateqty'])) {
             oci_bind_by_name($statement, ':mediumqty', $mediumQtyToAdd);
             oci_bind_by_name($statement, ':largeqty', $largeQtyToAdd);
             oci_bind_by_name($statement, ':prodID', $prodID);
-            
-           oci_execute($statement);
-           
-            
+
+            oci_execute($statement);
         }
-        
     }
     header("Location: indexadmin.php?error=successUpdate");
     exit();
-    
 }
 
 
-if (isset($_POST['Update'])){
+if (isset($_POST['Update'])) {
     $status = $_POST['status'];
     $orderID = $_POST['orderid'];
 
@@ -39,7 +35,7 @@ if (isset($_POST['Update'])){
 
     $result = oci_execute($stmt);
 
-    if($result) {
+    if ($result) {
         header("location: indexadmin.php?error=successUpdateStatus");
     } else {
         echo "<script> alert('Update failed');</script>";
